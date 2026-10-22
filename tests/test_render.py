@@ -54,6 +54,20 @@ def test_idle_state_when_nothing_is_open():
     assert activity.large_image == "idle"
 
 
+def test_user_idle_block_wins_over_the_main_templates():
+    config = build_config(
+        presence={
+            "details": "{project}",
+            "idle": {"details": "Pause café", "state": "Je reviens dans 5 min"},
+        }
+    )
+    renderer = Renderer(config)
+    state = make_state(nodes=[], opened=False, project_name="")
+    activity = renderer.render(state)
+    assert activity.details == "Pause café"
+    assert activity.state == "Je reviens dans 5 min"
+
+
 def test_rule_overrides_template():
     config = build_config(
         rules=[{"match": "TP0-*", "details": "Cours {project}", "state": "custom"}]

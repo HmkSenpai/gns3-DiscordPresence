@@ -140,6 +140,9 @@ python -m gns3presence -v              # logs détaillés
 | `--no-tray` | Désactive l'icône de notification |
 | `--install-autostart` | Enregistre le démarrage automatique |
 
+> À la sortie (Ctrl+C, `--once`, fermeture du tool), la présence est **effacée**
+> de Discord : pas d'activité fantôme. Laisse le tool tourner pour la garder.
+
 ### Diagnostic (`--check`)
 
 ```

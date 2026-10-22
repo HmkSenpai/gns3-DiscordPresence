@@ -124,7 +124,7 @@ class Publisher:
             self._last_sent_at = time.time()
             return True
         try:
-            self._rpc.set_activity(**payload)  # type: ignore[union-attr]
+            self._send(payload)
             self._last_payload_hash = self._hash(payload)
             self._last_sent_at = time.time()
             log.info("Presence updated: %s", payload)
@@ -135,6 +135,23 @@ class Publisher:
             self._rpc = None
             self._next_retry_at = time.time() + 10
             return False
+
+    def _send(self, payload: Dict[str, Any]) -> None:
+        """Send the activity, whatever the pypresence version.
+
+        pypresence 4.x renamed ``set_activity`` to ``update``; both are
+        supported so the companion works with the versions already installed
+        on the user's machine.
+        """
+        rpc = self._rpc
+        if rpc is None:  # pragma: no cover
+            raise RuntimeError("Not connected to Discord")
+        if hasattr(rpc, "update"):
+            rpc.update(**payload)
+        elif hasattr(rpc, "set_activity"):
+            rpc.set_activity(**payload)
+        else:  # pragma: no cover
+            raise RuntimeError("Unsupported pypresence version")
 
     def clear(self) -> None:
         """Remove the presence from Discord."""

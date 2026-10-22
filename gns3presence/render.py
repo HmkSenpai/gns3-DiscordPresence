@@ -242,10 +242,12 @@ class Renderer:
                 block[key] = value
 
         if state_name in ("idle", "closed"):
-            # Nothing to show but the "at rest" presence.
-            for key, value in (presence.get("idle", {}) or {}).items():
-                if not self.config.user_set(f"presence.idle.{key}"):
-                    block[key] = value
+            # Nothing to show but the "at rest" presence: the [presence.idle]
+            # block wins over the main templates (it may be user defined).
+            idle_block = dict(presence.get("idle", {}) or {})
+            merged = dict(block)
+            merged.update(idle_block)
+            block = merged
         return block
 
     def render(self, state: LabState) -> Activity:

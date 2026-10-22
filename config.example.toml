@@ -1,0 +1,117 @@
+# GNS3 Presence - example configuration
+#
+# Copy this file to `config.toml` next to the script (portable mode) or to
+#   Windows : %APPDATA%\GNS3Presence\config.toml
+#   macOS   : ~/Library/Application Support/GNS3Presence/config.toml
+#   Linux   : ~/.config/GNS3Presence/config.toml
+# Every key is optional: what is not listed falls back to the built-in default.
+
+[discord]
+# Application ID of your Discord application
+# https://discord.com/developers/applications -> General Information -> Application ID
+app_id = "000000000000000000"
+
+# How often we ask GNS3 for news (seconds).
+poll_interval = 15
+
+# Minimum delay between two Discord updates (Discord allows ~5 updates / 20 s).
+min_update_interval = 15
+
+# Remove the presence when GNS3 is closed.
+clear_when_idle = true
+
+[gns3]
+# "auto" discovers the server (config file, GNS3_URL, usual ports).
+# Set an explicit URL for a remote server, e.g. "http://192.168.1.10:3080".
+url = "auto"
+
+# Credentials, only needed when the GNS3 server runs with authentication.
+username = ""
+password_env = "GNS3_PASSWORD"
+
+timeout = 3.0
+
+# "auto" reads projects_path from the GNS3 configuration file.
+projects_path = "auto"
+
+# When the controller reports no opened project, fall back on the project file
+# modified within the last N minutes (0 disables the fallback).
+fallback_recent_minutes = 10
+
+[presence]
+# minimal | student | teacher | streamer | compact
+preset = "student"
+
+# {project} {project_id} {running} {total} {links} {summary} {elapsed}
+# {dominant_type} {dominant_label} {server_version} {count.router} {running.switch}
+details = "{project}"
+state = "{running}/{total} {t_nodes} · {links} {t_links}"
+
+large_image = "gns3"
+large_text = "GNS3 {server_version}"
+small_image = "{dominant_type}"
+small_text = "{dominant_label}"
+
+# project | session | none
+timestamp = "project"
+
+# Display "x of y" next to the activity.
+party = true
+
+# Max 2 buttons, the URL must start with http:// or https://
+# [[presence.buttons]]
+# label = "Voir le lab"
+# url = "https://github.com/Hinmaka"
+buttons = []
+
+[presence.idle]
+details = "Au repos"
+state = "Prêt pour un nouveau lab"
+large_image = "idle"
+large_text = "GNS3"
+small_image = ""
+small_text = ""
+
+[privacy]
+# When enabled (or when the project name matches a pattern) the project name
+# is hidden and replaced by `replacement`.
+enabled = false
+patterns = ["exam", "examen", "concours", "eval", "noté", "corrigé"]
+hide_node_names = true
+hide_buttons = true
+replacement = "Un lab réseau"
+
+[images]
+# Mapping category -> asset key uploaded in the Discord developer portal.
+router = "router"
+switch = "switch"
+pc = "pc"
+firewall = "firewall"
+vm = "vm"
+unknown = "gns3"
+
+[categories]
+# Mapping category -> GNS3 node types.
+router = ["dynamips", "iou", "router", "cisco"]
+switch = ["ethernet_switch", "frame_relay_switch", "atm_switch", "switch"]
+pc = ["vpcs", "pc", "virtual_pc", "workstation"]
+firewall = ["firewall", "asa", "fortigate", "pfsense"]
+vm = ["qemu", "vmware", "virtualbox", "hyper-v", "docker", "linux"]
+
+language = "fr"
+
+# Per-project overrides. The first matching rule wins.
+# `match` accepts a glob (TP*), a regex (/.../) or "re:...".
+#
+# [[rules]]
+# match = "TP0-*"
+# details = "TP0 - {project}"
+# state = "{running}/{total} {t_nodes} · {summary}"
+# large_image = "gns3"
+# small_image = "{dominant_type}"
+# party = true
+# timestamp = "project"
+#
+# [[rules]]
+# match = "re:exam|concours"
+# privacy = true

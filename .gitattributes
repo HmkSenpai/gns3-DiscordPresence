@@ -1,0 +1,6 @@
+# Normalise line endings: the repository stores LF, Windows checkouts use CRLF.
+* text=auto eol=lf
+
+*.png binary
+*.ico binary
+*.exe binary

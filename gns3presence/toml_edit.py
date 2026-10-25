@@ -55,13 +55,24 @@ def _dump_table(data: Dict[str, object], prefix: str = "") -> List[str]:
     return lines
 
 
+def _toml_module():
+    """Return the TOML parser module, whatever the Python version."""
+    try:
+        import tomllib  # Python >= 3.11
+
+        return tomllib
+    except ModuleNotFoundError:  # pragma: no cover - Python < 3.11
+        import tomli
+
+        return tomli
+
+
 def read_toml(path: Path) -> Dict[str, object]:
     """Read a TOML file (returns an empty dict when unreadable)."""
     try:
-        import tomllib
-
+        module = _toml_module()
         with path.open("rb") as handle:
-            return tomllib.load(handle)
+            return module.load(handle)
     except Exception:
         return {}
 

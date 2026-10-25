@@ -250,10 +250,10 @@ def run_check(config: Config) -> int:
     # 0. The configuration file must be readable.
     if config.path and config.path.exists():
         try:
-            with config.path.open("rb") as handle:
-                import tomllib
+            from .toml_edit import _toml_module
 
-                tomllib.load(handle)
+            with config.path.open("rb") as handle:
+                _toml_module().load(handle)
             print(f"{OK} config file      : valid TOML")
         except Exception as exc:
             print(f"{KO} config file      : INVALID TOML ({exc})")

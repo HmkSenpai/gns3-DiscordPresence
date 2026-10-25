@@ -1,4 +1,4 @@
-"""Tests that keep the shipped configuration files valid.
+﻿"""Tests that keep the shipped configuration files valid.
 
 A root level key placed after a section silently belongs to that section in
 TOML, which broke the ``language`` setting: it must stay before the first
@@ -13,9 +13,11 @@ from pathlib import Path
 import pytest
 
 try:
-    import tomllib
+    import tomllib  # noqa: F401
 except ModuleNotFoundError:  # pragma: no cover
-    import tomli as tomllib  # type: ignore[no-redef]
+    pass
+
+from gns3presence.toml_edit import _toml_module  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 TEMPLATES = [
@@ -32,7 +34,7 @@ def test_template_is_valid_toml(path: Path):
     if not path.exists():
         pytest.skip(f"{path} not present")
     with path.open("rb") as handle:
-        tomllib.load(handle)
+        _toml_module().load(handle)
 
 
 @pytest.mark.parametrize("path", TEMPLATES)
@@ -63,7 +65,7 @@ def test_language_is_a_root_key(path: Path):
     if not path.exists():
         pytest.skip(f"{path} not present")
     with path.open("rb") as handle:
-        data = tomllib.load(handle)
+        data = _toml_module().load(handle)
     assert "language" in data, "language must be a root level key"
     assert "language" not in data.get("categories", {})
     assert "language" not in data.get("privacy", {})
@@ -88,3 +90,4 @@ def test_no_duplicated_key_in_the_same_section(path: Path):
             key = f"{section}.{match.group(1)}"
             assert key not in seen, f"{path.name}:{number}: duplicated key '{key}'"
             seen.add(key)
+

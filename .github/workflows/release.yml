@@ -45,24 +45,10 @@ jobs:
       - name: Build the executable and the archive
         run: python tools/package_release.py
 
-      - name: Checksum (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          $hash = (Get-FileHash "dist/${{ matrix.binary }}" -Algorithm SHA256).Hash.ToLower()
-          "$hash  ${{ matrix.binary }}" | Out-File -Encoding ascii "dist/${{ matrix.binary }}.sha256"
-
-      - name: Checksum (Linux / macOS)
-        if: runner.os != 'Windows'
-        shell: bash
-        run: cd dist && sha256sum "${{ matrix.binary }}" > "${{ matrix.binary }}.sha256"
-
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact }}
           path: |
-            dist/${{ matrix.binary }}
-            dist/${{ matrix.binary }}.sha256
             dist/${{ matrix.artifact }}.*
           if-no-files-found: error
 

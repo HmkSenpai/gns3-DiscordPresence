@@ -100,11 +100,22 @@ def archive(stage_dir: Path) -> Path:
     return archive_path
 
 
+def write_checksum(archive_path: Path) -> Path:
+    """Write the SHA-256 of the archive next to it."""
+    import hashlib
+
+    digest = hashlib.sha256(archive_path.read_bytes()).hexdigest()
+    checksum_path = archive_path.with_suffix(archive_path.suffix + ".sha256")
+    checksum_path.write_text(f"{digest}  {archive_path.name}\n", encoding="utf-8")
+    return checksum_path
+
+
 def main() -> int:
     DIST.mkdir(exist_ok=True)
     binary = build_executable()
     stage_dir = stage(binary)
     archive_path = archive(stage_dir)
+    write_checksum(archive_path)
     size = archive_path.stat().st_size / (1024 * 1024)
     print(f"\nOK  {archive_path.name}  ({size:.1f} Mo)")
     print(f"    {binary.name}  ({binary.stat().st_size / (1024 * 1024):.1f} Mo)")

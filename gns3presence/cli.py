@@ -13,7 +13,7 @@ import time
 from pathlib import Path
 from typing import List, Optional
 
-from . import __version__
+from . import __version__, wizard
 from . import presence as presence_mod
 from .config import Config, load_config, reload_if_changed
 from .discovery import candidate_endpoints
@@ -37,6 +37,20 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--version", action="version", version=f"gns3-presence {__version__}")
     parser.add_argument("-c", "--config", help="path to a configuration file (TOML)")
+    parser.add_argument(
+        "--app-id",
+        help="Discord application id (skips the first run assistant)",
+    )
+    parser.add_argument(
+        "--shared-app",
+        action="store_true",
+        help="use the shared 'GNS3 Presence' application (no configuration needed)",
+    )
+    parser.add_argument(
+        "--setup",
+        action="store_true",
+        help="run the first launch assistant and exit",
+    )
     parser.add_argument(
         "--check",
         action="store_true",
@@ -229,7 +243,8 @@ def run_check(config: Config) -> int:
     # 3. Application ID
     app_id = config.app_id
     if not app_id:
-        print(f"{KO} application id   : missing - set discord.app_id in the config")
+        print(f"{KO} application id   : missing - run with --setup (assistant)")
+        print("      ou --shared-app pour utiliser l'application partagee")
         problems += 1
     elif not app_id.isdigit():
         print(f"{KO} application id   : '{app_id}' is not a valid Discord application id")
@@ -296,10 +311,33 @@ def run(config: Config, args: argparse.Namespace) -> int:
     min_update = float(config.get("discord.min_update_interval", 15) or 15)
     app_id = config.app_id
 
+    # ---- first launch: no application id yet -----------------------------
+    if args.app_id:
+        app_id = args.app_id.strip()
+    elif args.shared_app:
+        app_id = wizard.DEFAULT_APP_ID
+    elif not app_id:
+        app_id, choice = wizard.first_run(
+            config_path=config.path, shared_app_id=wizard.DEFAULT_APP_ID
+        )
+        if not app_id:
+            print()
+            print("  [i] Aucune application configuree : le tool va tourner sans presence.")
+            print("      Relance-le plus tard avec --setup pour la configurer.")
+            print()
+        else:
+            target = wizard.target_config_path(config.path)
+            wizard.write_app_id_to_config(target, app_id)
+            if choice == "custom":
+                print()
+                for line in wizard.asset_instructions():
+                    print(line)
+                print()
+
     if not args.dry_run and not app_id:
         log.error(
             "No Discord application id configured. Use --dry-run to preview, "
-            "or set discord.app_id in the configuration file."
+            "or run with --setup to configure it."
         )
         return 2
 
@@ -415,6 +453,23 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     if args.print_config:
         print(json.dumps(config.to_dict(), ensure_ascii=False, indent=2))
+        return 0
+
+    if args.setup:
+        app_id, choice = wizard.first_run(
+            config_path=config.path, shared_app_id=wizard.DEFAULT_APP_ID
+        )
+        if not app_id:
+            print("  [!] Configuration annulee.")
+            return 1
+        target = wizard.target_config_path(config.path)
+        wizard.write_app_id_to_config(target, app_id)
+        if choice == "custom":
+            print()
+            for line in wizard.asset_instructions():
+                print(line)
+            print()
+        print("  [OK] C'est pret : lance le tool pour afficher ta presence.")
         return 0
 
     if args.check:

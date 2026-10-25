@@ -1,0 +1,48 @@
+============================================
+ GNS3 Presence - Guide de demarrage rapide
+============================================
+
+LANCEZ LE PROGRAMME
+-------------------
+Windows : double-cliquez sur gns3-presence.exe
+Linux   : ./gns3-presence
+macOS   : ./gns3-presence (clic droit > Ouvrir si macOS bloque)
+
+Au premier lancement, un assistant vous propose :
+
+  1. Utiliser l'application partagee "GNS3 Presence"
+     -> zero configuration, l'affichage est immediat sur votre profil Discord
+     -> les icones par defaut sont utilisees
+
+  2. Utiliser votre propre application Discord
+     -> https://discord.com/developers/applications
+     -> "New Application" -> nommez-la par exemple "GNS3 Presence"
+     -> General Information > copiez l'Application ID
+     -> Rich Presence > Art Assets > uploadez les images du dossier assets/
+        (la cle de chaque asset est le nom du fichier SANS extension)
+
+Tant que l'assistant n'a pas ete valide, la presence ne s'affiche pas.
+Vous pouvez le relancer a tout moment avec :
+
+    gns3-presence --setup
+
+AIDE
+----
+    gns3-presence --check        diagnostique complet
+    gns3-presence --dry-run      affiche ce qui serait publie
+    gns3-presence --once         publie une fois puis quitte
+    gns3-presence --help         toutes les options
+
+PERSONNALISATION
+----------------
+Copiez le fichier "config.toml" du dossier exemples a cote de l'executable,
+puis modifiez-le (il est recharge a chaud).
+
+Le fichier exemples/config.toml contient les options disponibles :
+presets d'affichage, regles par projet, mode discret, boutons, etc.
+Documentation complete : https://github.com/Hinmaka/gns3-DiscordPresence
+
+NOTE
+----
+GNS3 est une marque de GNS3 Technologies. Ce projet n'est ni affilie ni
+approuve par GNS3 Technologies.

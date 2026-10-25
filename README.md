@@ -56,31 +56,55 @@ automatiquement (port 3080, 80, GNS3 VM, contrôleur distant…).
 
 ## Démarrage rapide (3 étapes)
 
-### 1. Créer l'application Discord
+### 1. Télécharge l'exécutable
 
-1. Va sur <https://discord.com/developers/applications> → **New Application**.
-2. Donne-lui un nom, par exemple `GNS3 Presence`.
-   ⚠️ Évite le nom `GNS3` seul : c'est une marque de GNS3 Technologies.
-3. Ouvre **General Information** et copie l'**Application ID**.
+Depuis la page [Releases](https://github.com/Hinmaka/gns3-DiscordPresence/releases) :
+`gns3-presence-windows.zip`, `gns3-presence-linux.tar.gz` ou
+`gns3-presence-macos.tar.gz`.
 
-### 2. Uploader les icônes
+Décompresse le dossier où tu veux. **Aucune installation, aucune dépendance** :
+le binaire embarque Python et toutes les librairies.
 
-1. Dans ton application → **Rich Presence** → **Art Assets**.
-2. Uploade les fichiers de [`assets/large/`](assets/large) (512×512) :
-   `gns3`, `router`, `switch`, `pc`, `firewall`, `vm`, `idle`.
-   La **clé** d'un asset est son nom de fichier **sans** l'extension.
-3. Copie ensuite [`config.example.toml`](config.example.toml) en `config.toml`
-   et renseigne `app_id`.
-
-### 3. Lancer
-
-```bash
-pip install -r requirements.txt
-python -m gns3presence --check     # diagnostic
-python -m gns3presence             # c'est parti
+```
+gns3-presence/
+├── gns3-presence.exe      ← lance-le
+├── config.toml            ← créé automatiquement au 1er lancement
+└── exemples/              ← config commentée + icônes à uploader
 ```
 
-Ton profil Discord affiche maintenant ton activité GNS3.
+### 2. Lance-le : un assistant s'occupe du reste
+
+Au premier lancement, l'assistant te propose :
+
+```
+  1. Utiliser l'application partagée 'GNS3 Presence'
+     -> zéro configuration, l'affichage est immédiat sur ton profil
+
+  2. Utiliser ma propre application Discord
+     -> https://discord.com/developers/applications
+```
+
+- **Option 1** : rien à faire, la présence s'affiche immédiatement avec les
+  icônes par défaut du projet.
+- **Option 2** : crée ton application, copie l'Application ID, et uploade les
+  images de `exemples/assets/` dans *Rich Presence → Art Assets* (la clé de
+  chaque asset = nom du fichier **sans** extension). Tu as alors tes propres
+  icônes et ton propre nom d'application.
+
+Tu peux changer d'avis à tout moment : `gns3-presence --setup`.
+
+### 3. C'est parti
+
+Lance GNS3, ouvre un lab : ton profil Discord affiche le projet, les nœuds
+démarrés et le temps écoulé.
+
+```bash
+gns3-presence --check     # diagnostic
+gns3-presence             # mode normal
+```
+
+> Tu préfères la version Python ? `pip install -r requirements.txt` puis
+> `python -m gns3presence` — l'assistant fonctionne à l'identique.
 
 ---
 
@@ -88,7 +112,17 @@ Ton profil Discord affiche maintenant ton activité GNS3.
 
 Guide complet : [`docs/installation.md`](docs/installation.md).
 
-### Option 1 — le script (recommandé pour les dévs)
+### Option 1 — l'exécutable portable (aucune installation)
+
+Télécharge `gns3-presence-windows.zip` (ou linux/macos) depuis la page
+[Releases](https://github.com/Hinmaka/gns3-DiscordPresence/releases),
+décompresse le dossier où tu veux et double-clique sur l'exe.
+
+Le binaire embarque Python, `pypresence` et l'icône de notification : **rien à
+installer**. Au premier lancement, l'assistant crée le `config.toml` à côté de
+l'exe.
+
+### Option 2 — le script (recommandé pour les dévs)
 
 ```bash
 git clone https://github.com/Hinmaka/gns3-DiscordPresence.git
@@ -136,6 +170,9 @@ python -m gns3presence -v              # logs détaillés
 | Option | Effet |
 |---|---|
 | `-c, --config FICHIER` | Utilise un fichier de configuration précis |
+| `--setup` | Relance l'assistant (changer d'application Discord) |
+| `--shared-app` | Utilise l'application partagée sans toucher à la configuration |
+| `--app-id ID` | Impose un Application ID (utile pour les scripts) |
 | `--interval SECONDES` | Change l'intervalle d'interrogation de GNS3 |
 | `--no-tray` | Désactive l'icône de notification |
 | `--install-autostart` | Enregistre le démarrage automatique |

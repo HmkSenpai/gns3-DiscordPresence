@@ -40,36 +40,19 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pyinstaller pypresence tomli
+          pip install pyinstaller pypresence tomli pystray pillow
 
-      - name: Build (Linux / macOS)
-        if: runner.os != 'Windows'
-        run: |
-          pyinstaller --onefile --name gns3-presence \
-            --collect-all pypresence \
-            entrypoint.py
-          mv dist/gns3-presence dist/${{ matrix.binary }}
-          chmod +x dist/${{ matrix.binary }}
-
-      - name: Build (Windows)
-        if: runner.os == 'Windows'
-        run: |
-          pyinstaller --onefile --name gns3-presence ^
-            --collect-all pypresence ^
-            entrypoint.py
-          copy dist\gns3-presence.exe dist\${{ matrix.binary }} /Y
+      - name: Build the executable and the archive
+        run: python tools/package_release.py
 
       - name: Checksum
         working-directory: dist
-        run: sha256sum ${{ matrix.binary }} > ${{ matrix.binary }}.sha256 || shasum -a 256 ${{ matrix.binary }} > ${{ matrix.binary }}.sha256
-
-      - name: Package (Windows)
-        if: runner.os == 'Windows'
-        run: Compress-Archive -Path dist/${{ matrix.binary }}, config.example.toml, README.md, assets -DestinationPath ${{ matrix.artifact }}.zip
-
-      - name: Package (Linux / macOS)
-        if: runner.os != 'Windows'
-        run: tar -czf ${{ matrix.artifact }}.tar.gz -C dist ${{ matrix.binary }} ${{ matrix.binary }}.sha256
+        run: |
+          if [ "${{ runner.os }}" = "Windows" ]; then \
+            sha256sum "${{ matrix.binary }}" > "${{ matrix.binary }}.sha256"; \
+          else \
+            sha256sum "${{ matrix.binary }}" > "${{ matrix.binary }}.sha256"; \
+          fi
 
       - uses: actions/upload-artifact@v4
         with:
@@ -77,8 +60,7 @@ jobs:
           path: |
             dist/${{ matrix.binary }}
             dist/${{ matrix.binary }}.sha256
-            ${{ matrix.artifact }}.zip
-            ${{ matrix.artifact }}.tar.gz
+            dist/${{ matrix.artifact }}.*
           if-no-files-found: error
 
   release:

@@ -55,20 +55,19 @@ Télécharge l'archive correspondant à ton système depuis la page
 | Linux | `gns3-presence-linux.tar.gz` |
 | macOS | `gns3-presence-macos.tar.gz` |
 
-Décompresse **dans un dossier de ton choix** (par exemple `C:\Tools\GNS3Presence`)
-et place ton `config.toml` à côté de l'exécutable :
+Décompresse **dans un dossier de ton choix** (par exemple `C:\Tools\GNS3Presence`) :
 
 ```
 GNS3Presence/
 ├── gns3-presence.exe
-├── config.toml
-└── assets/          (facultatif, pour référence)
+└── exemples/
+    ├── config.toml      ← config commentée, copiée à la 1re utilisation
+    ├── LISEZ-MOI.txt
+    └── assets/          ← icônes à uploader sur Discord
 ```
 
-L'exécutable cherche sa configuration :
-
-1. à côté de lui ;
-2. sinon dans le dossier utilisateur (`%APPDATA%\GNS3Presence`, …).
+Le binaire embarque Python, `pypresence` et l'icône de notification : **rien à
+installer, aucune dépendance**.
 
 > **SmartScreen** : un binaire non signé est signalé par Windows. Clique sur
 > *Informations complémentaires* → *Exécuter quand même*, ou utilise la
@@ -76,31 +75,66 @@ L'exécutable cherche sa configuration :
 
 ---
 
-## 4. Configuration de l'application Discord
+## 4. Premier lancement : l'assistant
 
-C'est la partie à faire une seule fois :
+Le programme ne demande **aucune configuration manuelle**. Au premier
+lancement, l'assistant s'affiche :
+
+```
+====================================================
+ GNS3 Presence - assistant de premier lancement
+====================================================
+Aucune application Discord n'est encore configuree.
+
+  1. Utiliser l'application partagee 'GNS3 Presence'
+     -> zero configuration, l'affichage est immediat sur votre profil
+
+  2. Utiliser ma propre application Discord
+     -> https://discord.com/developers/applications
+```
+
+### Option 1 — l'application partagée
+
+Aucun réglage à faire. L'assistant écrit un `config.toml` à côté de
+l'exécutable et la présence s'affiche immédiatement avec les icônes par défaut
+du projet.
+
+> Cette application est celle créée par l'auteur du projet. L'Application ID
+> est public : tout le monde peut l'utiliser. Si tu veux tes propres icônes
+> et ton propre nom d'application, prends l'option 2.
+
+### Option 2 — ta propre application Discord
 
 1. <https://discord.com/developers/applications> → **New Application**.
 2. Nom de l'application : `GNS3 Presence` (évite d'utiliser la marque `GNS3`
-   seule).
-3. **General Information** → copie l'**Application ID**.
-4. **Rich Presence** → **Art Assets** → uploade les fichiers de
-   [`assets/large/`](../assets/large) : `gns3`, `router`, `switch`, `pc`,
-   `firewall`, `vm`, `idle`.
-   La clé de chaque asset est le nom du fichier sans extension.
-5. Crée `config.toml` à partir de [`config.example.toml`](../config.example.toml) :
+   seule, qui appartient à GNS3 Technologies).
+3. **General Information** → copie l'**Application ID** et colle-le dans
+   l'assistant.
+4. **Rich Presence** → **Art Assets** → uploade les images du dossier
+   `exemples/assets/` : `gns3`, `router`, `switch`, `pc`, `firewall`, `vm`,
+   `idle`. La clé de chaque asset est le nom du fichier sans extension.
 
-```toml
-[discord]
-app_id = "123456789012345678"
+L'assistant peut être relancé à tout moment :
+
+```bash
+gns3-presence --setup
 ```
+
+### Où est écrit le `config.toml` ?
+
+| Situation | Emplacement |
+|---|---|
+| Exécutable portable (dossier `exemples/` à côté) | à côté de l'exécutable |
+| Installation Python | `%APPDATA%\GNS3Presence\config.toml` (Windows), `~/.config/GNS3Presence/config.toml` (Linux), `~/Library/Application Support/GNS3Presence/config.toml` (macOS) |
+
+Le fichier est **rechargé à chaud** : modifie-le sans relancer le programme.
 
 ---
 
-## 5. Premier lancement
+## 5. Vérification
 
 ```bash
-python -m gns3presence --check
+gns3-presence --check
 ```
 
 Tout doit être en `[OK]`. Si `GNS3 server` est en `[KO]`, démarre GNS3 ou
@@ -109,7 +143,7 @@ renseigne `[gns3] url`.
 Puis lance le tool :
 
 ```bash
-python -m gns3presence
+gns3-presence
 ```
 
 ---

@@ -289,10 +289,23 @@ def start_web_app(
     thread.start()
     log.info("Web interface started on %s", url)
     if open_browser:
+        opened = False
         try:
-            webbrowser.open(url)
+            opened = bool(webbrowser.open(url))
         except Exception:  # pragma: no cover
-            pass
+            opened = False
+        if not opened:
+            # The browser could not be opened: give the URL to the user.
+            try:
+                import subprocess
+
+                if os.name == "nt":
+                    subprocess.run(["clip"], input=url, text=True, check=False)
+                else:
+                    subprocess.run(["pbcopy"], input=url, text=True, check=False)
+            except Exception:
+                pass
+            log.warning("Could not open the browser, the URL has been copied to the clipboard")
     return server, url
 
 

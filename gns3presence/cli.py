@@ -348,8 +348,13 @@ def run(config: Config, args: argparse.Namespace) -> int:
     # ---- first launch: no application id yet -----------------------------
     if args.app_id:
         app_id = args.app_id.strip()
+        if config.app_id != app_id:
+            wizard.write_app_id_to_config(wizard.target_config_path(config.path), app_id)
     elif args.shared_app:
         app_id = wizard.DEFAULT_APP_ID
+        # Remember it so the next launch does not ask anything.
+        if config.app_id != app_id:
+            wizard.write_app_id_to_config(wizard.target_config_path(config.path), app_id)
     elif not app_id:
         app_id, choice = wizard.first_run(
             config_path=config.path, shared_app_id=wizard.DEFAULT_APP_ID

@@ -131,7 +131,39 @@ Le fichier est **rechargé à chaud** : modifie-le sans relancer le programme.
 
 ---
 
-## 5. Vérification
+## 5. Personnalisation graphique
+
+Au lancement, une **interface web locale** s'ouvre automatiquement dans le
+navigateur :
+
+```
+┌──────────────────────────────────────────┬─────────────────────────────┐
+│  APERÇU EN DIRECT                        │  CE QUI EST AFFICHÉ         │
+│  ┌────────────────────────────────┐      │  ☐ Montrer le nom du projet │
+│  │ GNS3 Presence                  │      │  ☐ Montrer les nœuds       │
+│  │ TP0-CamTrust                   │      │  ☐ Montrer le temps écoulé │
+│  │ 6/8 nœuds · 12 liens          │      │  ☐ Montrer l'icône equip.  │
+│  │ il y a 42 min                  │      │  ☐ Mode discret            │
+│  └────────────────────────────────┘      │                             │
+│  Lab : TP0-CamTrust (running)            │  [Enregistrer et appliquer] │
+└──────────────────────────────────────────┴─────────────────────────────┘
+```
+
+- Serveur local sur `127.0.0.1:8765` : **jamais** accessible depuis le réseau.
+- Chaque session a un jeton aléatoire dans l'URL.
+- L'aperçu affiche exactement ce qui sera publié sur Discord.
+- Les réglages sont écrits dans `config.toml` et appliqués immédiatement.
+
+```bash
+gns3-presence              # interface + présence (par défaut)
+gns3-presence --web        # force l'ouverture de l'interface
+gns3-presence --no-web     # sans interface
+gns3-presence --web-port 9000
+```
+
+---
+
+## 6. Vérification
 
 ```bash
 gns3-presence --check
@@ -148,7 +180,7 @@ gns3-presence
 
 ---
 
-## 6. Démarrage automatique
+## 7. Démarrage automatique
 
 | Système | Commande |
 |---|---|
@@ -160,7 +192,7 @@ Pour annuler : `--uninstall-autostart`.
 
 ---
 
-## 7. Mise à jour
+## 8. Mise à jour
 
 ```bash
 git pull

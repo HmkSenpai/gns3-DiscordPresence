@@ -31,16 +31,33 @@ AIDE
     gns3-presence --check        diagnostique complet
     gns3-presence --dry-run      affiche ce qui serait publie
     gns3-presence --once         publie une fois puis quitte
+    gns3-presence --setup        relance l'assistant (changer d'application)
     gns3-presence --help         toutes les options
 
-PERSONNALISATION
-----------------
-Copiez le fichier "config.toml" du dossier exemples a cote de l'executable,
-puis modifiez-le (il est recharge a chaud).
+PERSONNALISATION GRAPHIQUE
+--------------------------
+Au lancement, une page web s'ouvre dans votre navigateur :
+des cases a cocher pour afficher ou masquer le nom du projet, le temps
+ecoule, les noeuds, les liens, l'icone de l'equipement, le compteur x sur y,
+et un mode discret pour les examens.
+
+  - l'interface est ouverte automatiquement au double-clic
+  - elle n'ecoute que sur 127.0.0.1 (jamais accessible depuis le reseau)
+  - l'apercu montre exactement ce qui sera publie sur Discord
+  - "Enregistrer et appliquer" ecrit dans config.toml et applique aussitot
+
+  gns3-presence --no-web        pour ne pas l'ouvrir (ligne de commande)
+  gns3-presence --web-port 9000 pour changer de port
+
+PERSONNALISATION (FICHIER)
+--------------------------
+Le fichier config.toml (cree a cote de l'executable) contient les memes
+reglages, avec les commentaires. Il est recharge a chaud : modifiez-le sans
+relancer le programme.
 
 Le fichier exemples/config.toml contient les options disponibles :
 presets d'affichage, regles par projet, mode discret, boutons, etc.
-Documentation complete : https://github.com/Hinmaka/gns3-DiscordPresence
+Documentation complete : https://github.com/HmkSenpai/gns3-DiscordPresence
 
 NOTE
 ----

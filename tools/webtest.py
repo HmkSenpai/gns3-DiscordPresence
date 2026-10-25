@@ -1,4 +1,4 @@
-"""End to end test of the web interface (API level)."""
+﻿"""End to end test of the web interface (API level)."""
 
 import json
 import sys
@@ -8,7 +8,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from gns3presence.config import DEFAULTS, Config, deep_merge  # noqa: E402
-from gns3presence.webapp import find_free_port, start_web_app  # noqa: E402
+from gns3presence.webapp import start_web_app  # noqa: E402
 
 tmp = Path(__file__).parent.parent / ".tmp-webtest"
 tmp.mkdir(exist_ok=True)
@@ -22,7 +22,7 @@ config_path.write_text(
 data = {}
 config = Config(deep_merge(DEFAULTS, data), config_path, 0.0, data)
 server, url = start_web_app(
-    config, config_path, port=find_free_port(8900), open_browser=False
+    config, config_path, port=8900, open_browser=False
 )
 token = url.split("token=")[1]
 
@@ -67,3 +67,4 @@ finally:
     import shutil
 
     shutil.rmtree(tmp, ignore_errors=True)
+

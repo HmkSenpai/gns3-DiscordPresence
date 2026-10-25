@@ -111,6 +111,29 @@ TEXT_FIELDS: List[Dict[str, Any]] = [
 ]
 
 
+def available_assets() -> List[str]:
+    """List the image keys available next to the program.
+
+    The keys are the file names without their extension: that is how Discord
+    names the assets uploaded in the developer portal.
+    """
+    import sys
+    from pathlib import Path
+
+    folders: List[Path] = []
+    if getattr(sys, "frozen", False):
+        folders.append(Path(sys.executable).resolve().parent / "exemples" / "assets")
+    folders.append(Path(__file__).resolve().parent.parent / "exemples" / "assets")
+
+    names = set()
+    for folder in folders:
+        if not folder.is_dir():
+            continue
+        for path in folder.glob("*.png"):
+            names.add(path.stem)
+    return sorted(names)
+
+
 @dataclass
 class UiSettings:
     """Flat view of the settings manipulated by the web interface."""

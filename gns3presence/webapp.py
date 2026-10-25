@@ -15,7 +15,6 @@ import json
 import logging
 import os
 import secrets
-import socket
 import subprocess
 import threading
 import webbrowser
@@ -43,18 +42,16 @@ DEFAULT_PORT = 8765
 MAX_PORT_ATTEMPTS = 20
 
 
-def find_free_port(start: int = DEFAULT_PORT, attempts: int = MAX_PORT_ATTEMPTS) -> int:
-    """Return the first free TCP port, starting at ``start``."""
-    for offset in range(attempts):
-        port = start + offset
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            try:
-                sock.bind(("127.0.0.1", port))
-            except OSError:
-                continue
-            return port
-    raise OSError(f"Aucun port libre entre {start} et {start + attempts - 1}")
+class _Server(ThreadingHTTPServer):
+    """HTTP server that refuses to share its port.
+
+    On Windows, ``SO_REUSEADDR`` lets two processes listen on the same port:
+    the requests would then be answered by one of them, with a token that
+    does not match the URL. Disabling it keeps one instance per port.
+    """
+
+    allow_reuse_address = False
+    daemon_threads = True
 
 
 def build_state(config: Config, watcher: Optional[Gns3Watcher]) -> Dict[str, Any]:
@@ -282,10 +279,29 @@ def start_web_app(
 
     Returns the server and the URL to open.
     """
-    real_port = find_free_port(port)
     app = WebApp(config, config_path, watcher, on_saved)
     handler = make_handler(app)
-    server = ThreadingHTTPServer(("127.0.0.1", real_port), handler)
+
+    # The server binds the port itself: testing the port and binding it later
+    # would let two instances share the same port (Windows allows it with
+    # SO_REUSEADDR), and each would answer with its own token.
+    server = None
+    last_error: Optional[OSError] = None
+    for offset in range(MAX_PORT_ATTEMPTS):
+        candidate = port + offset
+        try:
+            server = _Server(("127.0.0.1", candidate), handler)
+            break
+        except OSError as exc:
+            last_error = exc
+            continue
+    if server is None:
+        raise OSError(
+            f"Aucun port libre entre {port} et {port + MAX_PORT_ATTEMPTS - 1}"
+            + (f" ({last_error})" if last_error else "")
+        )
+
+    real_port = server.server_address[1]
     url = f"http://127.0.0.1:{real_port}/?token={app.token}"
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()

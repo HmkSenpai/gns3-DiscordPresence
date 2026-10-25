@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict
+from typing import Any, Dict, List, Optional
 
 from .editor import CHOICES, TEXT_FIELDS, TOGGLES
 
@@ -19,14 +19,16 @@ def _toggle_html(item: Dict[str, Any]) -> str:
       </label>"""
 
 
-def _choice_html(item: Dict[str, Any]) -> str:
-    options = "".join(
-        f'<option value="{option}">{option}</option>' for option in item["options"]
-    )
+def _choice_html(item: Dict[str, Any], extra_options: Optional[List[str]] = None) -> str:
+    options = list(item["options"])
+    for option in extra_options or []:
+        if option not in options:
+            options.append(option)
+    rendered = "".join(f'<option value="{option}">{option}</option>' for option in options)
     return f"""
       <div class="field">
         <label for="c_{item['key']}">{item['label']}</label>
-        <select data-key="{item['key']}" id="c_{item['key']}">{options}</select>
+        <select data-key="{item['key']}" id="c_{item['key']}">{rendered}</select>
       </div>"""
 
 
@@ -42,8 +44,14 @@ def _text_html(item: Dict[str, Any]) -> str:
 
 def render_page(token: str) -> str:
     """Return the complete HTML page."""
+    from .editor import available_assets
+
+    assets = available_assets()
     toggles = "".join(_toggle_html(item) for item in TOGGLES)
-    choices = "".join(_choice_html(item) for item in CHOICES)
+    choices = "".join(
+        _choice_html(item, assets if item["key"] == "presence.large_image" else None)
+        for item in CHOICES
+    )
     texts = "".join(_text_html(item) for item in TEXT_FIELDS)
     return f"""<!DOCTYPE html>
 <html lang="fr">
@@ -200,6 +208,15 @@ def render_page(token: str) -> str:
         <h2>Style</h2>
         <div class="cols">
           {choices}
+        </div>
+        <div class="field" style="margin-top:6px">
+          <label for="x_presence.small_image">Icone de l'equipement (cle d'asset)</label>
+          <input type="text" data-key="presence.small_image" id="x_presence.small_image"
+                 spellcheck="false" placeholder="{{dominant_type}} ou router / switch / pc">
+          <em style="font-size:12px;color:var(--muted);font-style:normal">
+            La cle est le nom du fichier uploade dans Rich Presence &gt; Art Assets,
+            sans l'extension. {{dominant_type}} suit l'equipement dominant du lab.
+          </em>
         </div>
       </div>
 

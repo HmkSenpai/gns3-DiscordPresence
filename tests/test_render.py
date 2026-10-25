@@ -151,6 +151,35 @@ def test_small_image_follows_dominant_category():
     assert activity.small_text == "switch"
 
 
+def test_empty_details_falls_back_to_a_neutral_text():
+    # Discord rejects an empty "details" field.
+    config = build_config(presence={"details": "", "state": ""})
+    renderer = Renderer(config)
+    activity = renderer.render(make_state())
+    assert activity.details.strip()
+    assert activity.state.strip()
+
+
+def test_preset_does_not_override_an_explicitly_empty_value():
+    # The user hid the project name: the preset must not bring it back.
+    config = build_config(presence={"details": ""})
+    renderer = Renderer(config)
+    activity = renderer.render(make_state())
+    assert "TP0-CamTrust" not in activity.details
+
+
+def test_preset_does_not_override_a_customised_state():
+    config = build_config(presence={"state": "{running}/{total}"})
+    renderer = Renderer(config)
+    state = make_state(
+        nodes=[make_node("R1", "dynamips", "started"), make_node("PC1", "vpcs", "stopped")],
+        links=3,
+    )
+    activity = renderer.render(state)
+    assert "{links}" not in activity.state
+    assert activity.state == "1/2"
+
+
 def test_payload_is_truncated_to_discord_limits():
     config = build_config(presence={"details": "x" * 300, "state": "y" * 300})
     renderer = Renderer(config)

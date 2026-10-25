@@ -200,8 +200,13 @@ def load_config(explicit: Optional[str] = None) -> Config:
         try:
             user_data = _read_toml(candidate)
         except Exception as exc:
-            errors.append(f"{candidate}: {exc}")
-            log.error("Cannot parse %s: %s", candidate, exc)
+            message = f"{candidate}: {exc}"
+            errors.append(message)
+            log.error("Cannot parse %s", message)
+            log.error(
+                "The configuration file is invalid: the default settings are used. "
+                "Fix or delete the file to restore your customisations."
+            )
             continue
         log.info("Configuration loaded from %s", candidate)
         merged = deep_merge(DEFAULTS, user_data)

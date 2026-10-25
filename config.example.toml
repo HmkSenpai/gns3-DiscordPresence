@@ -4,6 +4,10 @@
 #   Windows : %APPDATA%\GNS3Presence\config.toml
 #   macOS   : ~/Library/Application Support/GNS3Presence/config.toml
 #   Linux   : ~/.config/GNS3Presence/config.toml
+#
+# A root level key must stay before the first section: in TOML a key placed
+# after a section belongs to that section.
+language = "fr"
 # Every key is optional: what is not listed falls back to the built-in default.
 
 [discord]
@@ -97,8 +101,6 @@ switch = ["ethernet_switch", "frame_relay_switch", "atm_switch", "switch"]
 pc = ["vpcs", "pc", "virtual_pc", "workstation"]
 firewall = ["firewall", "asa", "fortigate", "pfsense"]
 vm = ["qemu", "vmware", "virtualbox", "hyper-v", "docker", "linux"]
-
-language = "fr"
 
 # Per-project overrides. The first matching rule wins.
 # `match` accepts a glob (TP*), a regex (/.../) or "re:...".

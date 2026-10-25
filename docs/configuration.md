@@ -115,6 +115,37 @@ small_text = ""
 
 ---
 
+## Interface graphique
+
+Le tool ouvre une interface web locale (`http://127.0.0.1:8765`) au démarrage.
+Elle expose les mêmes réglages que le fichier TOML, avec un aperçu en direct.
+
+| Option | Ligne de commande |
+|---|---|
+| Ouvrir l'interface | `--web` (par défaut au lancement normal) |
+| Ne pas l'ouvrir | `--no-web` |
+| Changer le port | `--web-port 9000` (auto-détection si occupé) |
+| Ne pas ouvrir le navigateur | `--no-browser` |
+
+Le serveur n'écoute que sur `127.0.0.1` et chaque session a un jeton
+aléatoire dans l'URL : il n'est pas accessible depuis le réseau.
+
+Correspondance des cases à cocher et des clés TOML :
+
+| Case à cocher | Clé équivalente |
+|---|---|
+| Montrer le nom du projet | `{project}` dans `presence.details` |
+| Montrer les nœuds démarrés | `{running}/{total}` dans `presence.state` |
+| Montrer le nombre de liens | `{links}` dans `presence.state` |
+| Montrer le résumé des équipements | `{summary}` dans `presence.state` |
+| Montrer le temps écoulé | `{elapsed}` dans `presence.state` |
+| Montrer l'icône de l'équipement | `presence.small_image` |
+| Montrer le compteur x sur y | `presence.party` |
+| Montrer les boutons | `presence.buttons` |
+| Mode discret | `privacy.enabled` |
+
+---
+
 ## Variables de modèle
 
 | Variable | Description |

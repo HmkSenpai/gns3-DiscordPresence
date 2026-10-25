@@ -238,7 +238,7 @@ class Renderer:
 
         preset_name = str(presence.get("preset", "student") or "student").lower()
         for key, value in PRESETS.get(preset_name, {}).items():
-            if not self.config.user_set(f"presence.{key}"):
+            if not self._is_customised(key, value):
                 block[key] = value
 
         if state_name in ("idle", "closed"):
@@ -249,6 +249,23 @@ class Renderer:
             merged.update(idle_block)
             block = merged
         return block
+
+    def _is_customised(self, key: str, preset_value: Any) -> bool:
+        """Has the user set this key (explicitly, even to an empty value)?"""
+        if self.config.user_set(f"presence.{key}"):
+            return True
+        # The value may also have been changed through the web interface: in
+        # that case it differs from the built-in default.
+        from .config import DEFAULTS
+
+        default_value = (DEFAULTS.get("presence", {}) or {}).get(key)
+        current = self.config.get(f"presence.{key}")
+        if current is None:
+            return False
+        if isinstance(default_value, str) and isinstance(current, str):
+            return current != default_value
+        return current != default_value
+
 
     def render(self, state: LabState) -> Activity:
         context = build_context(state, self.config, self.translator)
@@ -313,6 +330,13 @@ class Renderer:
             small_text=small_text[:128],
             buttons=buttons[:2],
         )
+
+        # Discord rejects an empty "details" (and an empty activity): when the
+        # user hides everything, fall back on a neutral text.
+        if not activity.details.strip():
+            activity.details = "GNS3"
+        if not activity.state.strip():
+            activity.state = "En cours"
 
         if timestamp == "project" and state.project_started_at:
             activity.start = state.project_started_at

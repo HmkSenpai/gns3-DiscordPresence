@@ -52,6 +52,27 @@ def build_parser() -> argparse.ArgumentParser:
         help="run the first launch assistant and exit",
     )
     parser.add_argument(
+        "--web",
+        action="store_true",
+        help="open the graphical customisation interface in a browser",
+    )
+    parser.add_argument(
+        "--no-web",
+        action="store_true",
+        help="do not open the customisation interface (default: it is opened)",
+    )
+    parser.add_argument(
+        "--web-port",
+        type=int,
+        default=8765,
+        help="port of the web interface (default: 8765, auto-detected if busy)",
+    )
+    parser.add_argument(
+        "--no-browser",
+        action="store_true",
+        help="do not open the browser automatically with --web",
+    )
+    parser.add_argument(
         "--check",
         action="store_true",
         help="run diagnostics (Discord, GNS3, application id, assets) and exit",
@@ -226,6 +247,19 @@ def run_check(config: Config) -> int:
     print(f"{INFO} python           : {platform.python_version()} ({sys.platform})")
     print(f"{INFO} configuration    : {config.path or 'defaults (no file found)'}")
 
+    # 0. The configuration file must be readable.
+    if config.path and config.path.exists():
+        try:
+            with config.path.open("rb") as handle:
+                import tomllib
+
+                tomllib.load(handle)
+            print(f"{OK} config file      : valid TOML")
+        except Exception as exc:
+            print(f"{KO} config file      : INVALID TOML ({exc})")
+            print("      the default settings are used - fix or delete the file")
+            problems += 1
+
     # 1. Discord client
     if discord_client_running():
         print(f"{OK} Discord client    : running")
@@ -378,6 +412,45 @@ def run(config: Config, args: argparse.Namespace) -> int:
         except Exception as exc:
             log.debug("Tray not started: %s", exc)
 
+    # ---- graphical customisation interface ------------------------------
+    web_server = None
+    # The interface is opened by default: double clicking the executable is
+    # enough to customise the presence.
+    want_web = args.web or (
+        not args.no_web
+        and not args.once
+        and not args.dry_run
+        and not args.check
+        and not args.print_config
+        and not args.setup
+    )
+    if want_web:
+        from .webapp import start_web_app
+
+        config_path = config.path or wizard.target_config_path(None)
+
+        def _on_saved() -> None:
+            nonlocal config
+            config = reload_if_changed(config, str(config_path))
+
+        try:
+            web_server, url = start_web_app(
+                config,
+                config_path,
+                watcher=watcher,
+                port=args.web_port,
+                open_browser=not args.no_browser,
+                on_saved=_on_saved,
+            )
+            print()
+            print(f"  Interface de personnalisation : {url}")
+            print("  Ferme le tool (Ctrl+C) pour arreter le serveur.")
+            print()
+        except OSError as exc:
+            log.error("Cannot start the web interface: %s", exc)
+            if args.web:
+                return 3
+
     last_state_key = ""
     try:
         while running:
@@ -422,6 +495,12 @@ def run(config: Config, args: argparse.Namespace) -> int:
     except KeyboardInterrupt:
         log.info("Interrupted by the user")
     finally:
+        if web_server is not None:
+            try:
+                web_server.shutdown()
+                web_server.server_close()
+            except Exception:
+                pass
         if tray is not None:
             tray.stop()
         if config.get("discord.clear_when_idle", True) and not args.dry_run:

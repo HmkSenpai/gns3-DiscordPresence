@@ -197,7 +197,41 @@ python -m gns3presence -v              # logs détaillés
 
 ---
 
-## Personnalisation
+## Personnalisation graphique
+
+Au lancement, une **interface web locale** s'ouvre dans ton navigateur : pas de
+fichier à éditer, juste des cases à cocher et un aperçu en direct.
+
+```
+┌──────────────────────────────────────────┬─────────────────────────────┐
+│  APERÇU EN DIRECT                        │  CE QUI EST AFFICHÉ         │
+│  ┌────────────────────────────────┐      │  ☐ Montrer le nom du projet │
+│  │ GNS3 Presence                  │      │  ☐ Montrer les nœuds       │
+│  │ TP0-CamTrust                   │      │  ☐ Montrer le temps écoulé │
+│  │ 6/8 nœuds · 12 liens          │      │  ☐ Montrer l'icône equip.  │
+│  │ il y a 42 min                  │      │  ☐ Mode discret            │
+│  └────────────────────────────────┘      │                             │
+│  Lab : TP0-CamTrust (running)            │  [Enregistrer et appliquer] │
+└──────────────────────────────────────────┴─────────────────────────────┘
+```
+
+- Serveur local sur `127.0.0.1:8765` (jamais accessible depuis le réseau).
+- L'aperçu montre **exactement** ce qui sera publié.
+- Les réglages sont écrits dans `config.toml`, qui reste éditable à la main.
+- L'application est **rechargée à chaud** : le changement s'applique aussitôt.
+
+```
+gns3-presence              # ouvre l'interface + publie la présence
+gns3-presence --web        # force l'ouverture de l'interface
+gns3-presence --no-web     # sans interface (utile en ligne de commande)
+```
+
+> Chaque réglage de l'interface a son équivalent TOML : la page web et le
+> fichier de configuration restent synchronisés.
+
+---
+
+## Personnalisation (fichier TOML)
 
 Tout se passe dans `config.toml` (exemple complet dans
 [`config.example.toml`](config.example.toml), référence complète dans

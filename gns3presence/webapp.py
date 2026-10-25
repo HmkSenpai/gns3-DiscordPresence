@@ -13,8 +13,10 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import secrets
 import socket
+import subprocess
 import threading
 import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -297,8 +299,6 @@ def start_web_app(
         if not opened:
             # The browser could not be opened: give the URL to the user.
             try:
-                import subprocess
-
                 if os.name == "nt":
                     subprocess.run(["clip"], input=url, text=True, check=False)
                 else:

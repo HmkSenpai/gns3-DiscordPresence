@@ -51,9 +51,18 @@ def build_executable() -> Path:
     return binary
 
 
+def platform_tag() -> str:
+    system = platform.system().lower()
+    return {"windows": "windows", "darwin": "macos"}.get(system, "linux")
+
+
 def stage(binary: Path) -> Path:
-    """Create the folder that will be archived."""
-    stage_dir = DIST / BINARY_NAME
+    """Create the folder that will be archived.
+
+    The folder name carries the platform tag: on Linux/macOS the binary is
+    called ``gns3-presence`` and a folder of the same name would collide.
+    """
+    stage_dir = DIST / f"{BINARY_NAME}-{platform_tag()}"
     if stage_dir.exists():
         shutil.rmtree(stage_dir)
     stage_dir.mkdir(parents=True)
@@ -76,17 +85,16 @@ def stage(binary: Path) -> Path:
 
 
 def archive(stage_dir: Path) -> Path:
-    system = platform.system().lower()
-    platform_tag = {"windows": "windows", "darwin": "macos"}.get(system, "linux")
-    if system == "windows":
-        archive_path = DIST / f"{BINARY_NAME}-{platform_tag}.zip"
+    tag = platform_tag()
+    if platform.system().lower() == "windows":
+        archive_path = DIST / f"{BINARY_NAME}-{tag}.zip"
         with zipfile.ZipFile(archive_path, "w", zipfile.ZIP_DEFLATED) as handle:
             for path in sorted(stage_dir.rglob("*")):
                 handle.write(path, path.relative_to(stage_dir.parent))
     else:
         import tarfile
 
-        archive_path = DIST / f"{BINARY_NAME}-{platform_tag}.tar.gz"
+        archive_path = DIST / f"{BINARY_NAME}-{tag}.tar.gz"
         with tarfile.open(archive_path, "w:gz") as handle:
             handle.add(stage_dir, arcname=stage_dir.name)
     return archive_path
